@@ -11,6 +11,7 @@
 
 #include "BluefruitConfig.h"
 
+const int LEDpin = 5;
 #if SOFTWARE_SERIAL_AVAILABLE
 #include <SoftwareSerial.h>
 #endif
@@ -45,6 +46,7 @@ void error(const __FlashStringHelper*err) {
 /**************************************************************************/
 void setup(void)
 {
+  pinMode (LEDpin, OUTPUT);
   while (!Serial);  // required for Flora & Micro
   delay(500);
 
@@ -114,6 +116,7 @@ void setup(void)
     @brief  Constantly poll for new command or response data
 */
 /**************************************************************************/
+int state = 0;
 void loop(void)
 {
   // Check for user input
@@ -134,10 +137,37 @@ void loop(void)
     Serial.print("* "); Serial.print(ble.available()); Serial.println(F(" bytes available from BTLE"));
   }
   // Echo received data
+  String message = "";
   while ( ble.available() )
   {
     int c = ble.read();
     Serial.print((char)c);
+    //Få knappen til at sende signal
+    message.concat((char)c);
+
+    //Serial.print("message: ");
+    //Serial.println(message);
+    if (message == "1")
+    {
+      if (state == 0)
+      {
+        message = "";
+        Serial.println("\nTurning LED ON");
+        digitalWrite(LEDpin, HIGH);
+        state = 1;
+      }
+      else
+      {
+        message = "";
+        Serial.println("\nTurning LED OFF");
+        digitalWrite(LEDpin, LOW);
+        state = 0;
+      }
+    }
+    else
+    {
+      message = "";
+    }
   }
   delay(1000);
 }
